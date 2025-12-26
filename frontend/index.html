@@ -1,77 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Realtime AI WebSocket Test</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        #chat {
-            white-space: pre-wrap;
-            background: #fff;
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 300px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-        input {
-            width: 70%;
-            padding: 8px;
-        }
-        button {
-            padding: 8px 12px;
-        }
-    </style>
+  <title>Realtime AI WebSocket Test</title>
+  <style>
+    #chat {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
-
 <body>
+  <h2>Realtime AI Chat (WebSocket)</h2>
+  <div id="chat">Connecting...\n</div>
 
-    <h2>Realtime AI Chat (WebSocket)</h2>
+  <input id="msg" placeholder="Type a message" />
+  <button onclick="send()">Send</button>
 
-    <div id="chat">Connecting to server...\n</div>
+  <script>
+    const chat = document.getElementById("chat");
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws/session/test123");
 
-    <input id="msg" type="text" placeholder="Type a message here" />
-    <button onclick="sendMessage()">Send</button>
+    ws.onopen = () => chat.innerText += "\nConnected ✅\n";
+    ws.onclose = () => chat.innerText += "\nDisconnected ❌\n";
 
-    <script>
-        const chatBox = document.getElementById("chat");
+    ws.onmessage = (e) => {
+      chat.innerText += e.data;
+      chat.scrollTop = chat.scrollHeight;
+    };
 
-        const ws = new WebSocket("ws://127.0.0.1:8000/ws/session/test123");
-
-        ws.onopen = () => {
-            chatBox.textContent += "Connected ✅\n\n";
-        };
-
-        ws.onmessage = (event) => {
-            chatBox.textContent += event.data;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        };
-
-        ws.onerror = (err) => {
-            chatBox.textContent += "\nWebSocket error ❌\n";
-            console.error(err);
-        };
-
-        ws.onclose = () => {
-            chatBox.textContent += "\nDisconnected ❌\n";
-        };
-
-        function sendMessage() {
-            const input = document.getElementById("msg");
-            if (input.value.trim() !== "") {
-                ws.send(input.value);
-                input.value = "";
-            }
-        }
-    </script>
-
+    function send() {
+      ws.send(document.getElementById("msg").value);
+      chat.innerText += "\n\nYou: " + document.getElementById("msg").value + "\nAI: ";
+      document.getElementById("msg").value = "";
+    }
+  </script>
 </body>
 </html>
